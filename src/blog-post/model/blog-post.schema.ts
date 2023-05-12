@@ -1,34 +1,32 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
-import { type } from "os";
+import { BlogPostCategoryTypesEnum } from "../enum/blog-post.enum";
+
 
 @Schema()
 export class BlogPost {
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'users' })
-    user: mongoose.Schema.Types.ObjectId
+    publisherID: mongoose.Schema.Types.ObjectId
 
     @Prop()
     title: string
 
     @Prop()
-    userName: string
+    publisher:string
 
     @Prop()
-    content: string
-
+    content:string
+     
     //todo
     //  @Prop()
     //  thumbNail:string
      
-
-    //todo
-    //  @Prop(Number)
-    //  followers:number
-
-    @Prop({ type: String, enum: ["Sport", "Food", "Tech", "Politics", "Entertainment"], default: "All" })
+    @Prop({ type: String, enum: Object.values(BlogPostCategoryTypesEnum)})
     category: string
-
+    
+    @Prop({types:Date, default:Date.now()})
+    createdAt : Date
 
 }
 export type BlogPostDocument = HydratedDocument<BlogPost>

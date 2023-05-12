@@ -6,7 +6,7 @@ import { Request } from "express";
 export class AuthGuard implements CanActivate {
 
     constructor(private jwtService: JwtService) { }
-
+    
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
        if (!token) throw new UnauthorizedException()
       
         try {
-            const payLoad =  await this.jwtService.verifyAsync(token, { secret: "secretOrPrivateKey must have a value" })
+            const payLoad =  await this.jwtService.verifyAsync(token, { secret:process.env.PRIVATE_KEY })
             console.log(payLoad)
             request['user'] = payLoad
         } catch(error) {
@@ -25,8 +25,6 @@ export class AuthGuard implements CanActivate {
 
         return true
     }
-
-    
 
     private extractTokenFromHeader(request: Request): string | undefined {
         const token = request.get("authorization")

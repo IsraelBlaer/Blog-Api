@@ -1,27 +1,21 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose'
-import { User, UserSchema } from './schema/user.schema';
-import { CreateUserDto } from './dto/create-user.dto'
+import { User, UserSchema } from '../model/user.model';
+import { CreateUserDto } from '../dto/create-user.dto'
 import * as bcrypt from 'bcrypt';
 
 
 
 @Injectable()
 export class UserService {
-
+    
     constructor(@InjectModel(User.name) readonly UserModel: Model<User>) { }
     
-    async findUser(email: string) {
-        return await this.UserModel.findOne({ email: email })
-    }
-
-    async signUp(user: CreateUserDto) {
-
-        const userExist = await this.UserModel.findOne({ email: user.email })
-
-        if (userExist) throw new ConflictException(`EMAIL:${user.email} already registered provide new email`)
-     
+    
+    async signUp(user: CreateUserDto):Promise<User> {
+        
+        
          const newUser =  new this.UserModel({...user})
          console.log(newUser)
     
@@ -30,6 +24,12 @@ export class UserService {
          newUser.password=result
          return await newUser.save()
           
+    }
+
+    
+    async fetchUserByEmail(email: string) {
+        const userExist = await this.UserModel.findOne({ email: email })
+        return userExist
     }
 
     async hashPassword(password: string): Promise<string> {
@@ -42,6 +42,18 @@ export class UserService {
       async comparePassword(myPlaintextPassword:string, hash:string): Promise<boolean> {
          console.log(await bcrypt.compare(myPlaintextPassword,hash))
          return await bcrypt.compare(myPlaintextPassword,hash)
+      }
+
+       checkUserRole(userRoles:[]):boolean{
+         let count = 0;
+         while(count<userRoles.length){
+
+            if(userRoles[count]==='AUTHOR') {
+                return true
+            }
+            count ++ 
+         }
+         return false
       }
       
     }
