@@ -1,7 +1,7 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose'
-import { User, UserSchema } from '../model/user.model';
+import { User } from '../model/user.model';
 import { CreateUserDto } from '../dto/create-user.dto'
 import * as bcrypt from 'bcrypt';
 
@@ -24,6 +24,14 @@ export class UserService {
          newUser.password=result
          return await newUser.save()
           
+    }
+    
+    async uploadProfile(profilePicture:string, userId:string){
+     const user = await this.UserModel.findOne({_id:userId})
+     console.log("user", user)
+     if(!user) throw new NotFoundException("user with this id not found")
+      user.profilePicture=profilePicture
+      return await user.save();
     }
 
     

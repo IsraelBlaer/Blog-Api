@@ -1,7 +1,7 @@
 export enum BlogPostCategoryTypesEnum {
  Sport  = 'Sport',
  Politics = 'Politics',
- FashionBeauty = 'Fashion&Beauty', 
+ FashionBeauty = 'Fashion & Beauty', 
  Religion = 'Religion',
  Health = 'Health',
  Entertainment = 'Entrtainment',

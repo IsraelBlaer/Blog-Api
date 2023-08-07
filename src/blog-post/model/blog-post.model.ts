@@ -4,31 +4,32 @@ import { BlogPostCategoryTypesEnum } from "../enum/blog-post.enum";
 
 
 @Schema()
-export class BlogPost {
-
+export class BlogPost {  
+    
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'users' })
-    publisherID: mongoose.Schema.Types.ObjectId
-
+    publisherID: string
+    
     @Prop()
     title: string
 
     @Prop()
-    publisher:string
-
-    @Prop()
     content:string
      
-    //todo
-    //  @Prop()
-    //  thumbNail:string
-     
-    @Prop({ type: String, enum: Object.values(BlogPostCategoryTypesEnum)})
+    @Prop({enum: Object.values(BlogPostCategoryTypesEnum)})
     category: string
     
-    @Prop({types:Date, default:Date.now()})
+    @Prop({type:Array<String>})
+    featuredImages:string[]
+    
+    @Prop({type:Date, default:Date.now})
     createdAt : Date
-
+    
+    @Prop({type:Date})
+    updatedAt : Date
+      
 }
+
+
 export type BlogPostDocument = HydratedDocument<BlogPost>
 
 

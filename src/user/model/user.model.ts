@@ -1,5 +1,6 @@
 import {Prop,Schema,SchemaFactory} from '@nestjs/mongoose'
-import { UserTypesEnum } from '../enum/user.enum'
+import { UserRolesEnum } from '../enum/user.enum'
+
 
 @Schema()
 export class User {
@@ -19,17 +20,17 @@ export class User {
     @Prop()
     lastName:string
     
-    @Prop({type:[String],enum:Object.values(UserTypesEnum), default:UserTypesEnum.User})
-    roles:UserTypesEnum[]
+    @Prop({type:[String],enum:Object.values(UserRolesEnum), default:UserRolesEnum.User})
+    roles:UserRolesEnum[]
     
     @Prop({type:Boolean, default:false})
     isVerified:boolean
      
-    @Prop({type:Date, default:Date.now()})
+    @Prop({type:Date, default:Date.now})
     createdAt:Date
     
-    @Prop(String)
-    Avatar:String
+    @Prop()
+    profilePicture:string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

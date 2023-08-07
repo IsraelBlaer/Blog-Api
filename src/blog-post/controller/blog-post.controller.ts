@@ -1,61 +1,75 @@
-import { Body, Controller, Delete, Get, Injectable, Param, Post, Put, UsePipes, ValidationPipe,UseGuards,Req,ForbiddenException } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    UseInterceptors,
+    UploadedFiles
+} from '@nestjs/common';
 import { BlogPostService } from '../service/blog-post.service';
 import { CreateBlogPostDto } from '../dto/create-blog-post.dto';
-import { BlogPost } from '../model/blog-post.schema';
-import { ParseObjectID } from 'src/utils/pipes/objectIdPipe';
-import  {JoiValidationPipe} from '../../utils/pipes/validation.pipe'
-import { BlogPostSchema, BlogPostParamSchema} from '../validator/blog-post.validator';
-import { AuthGuard } from 'src/auth/guard/auth.guard';
+import { BlogPost } from '../model/blog-post.model';
+import { JoiValidationPipe, ObjectIdValidationPipe, FilesValidationPipe } from '../../utils/pipes/validation.pipe'
+import { BlogPostSchema, BlogPostParamSchema } from '../validator/blog-post.validator';
 import { UserService } from 'src/user/service/user.service';
+import { TokenDecorator } from 'src/utils/decorators/user.decorator';
+import { TokenDto } from 'src/auth/dto/create-auth.dto';
+import { Public } from 'src/utils/decorators/public.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { UploadService } from '../../upload/service/upload.service';
 
 @Controller('blog-post')
 export class BlogPostController {
     constructor(
         private readonly blogPostservice: BlogPostService,
-        private readonly userService:UserService
-        ) { }
-     
-    
-    @UseGuards(AuthGuard)
+        private readonly userService: UserService,
+        private readonly uploadService: UploadService
+    ) { }
+
+
+    @UseInterceptors(FilesInterceptor('files'))
     @Post('create')
-    @UsePipes(new JoiValidationPipe(BlogPostSchema))
-    createBlogPost(@Body()  blogPost: CreateBlogPostDto, @Req() req): Promise<BlogPost> {
-        console.log(req.user)
-        const {userName,userId,userRoles} = req.user
-     //   if(!(this.userService.checkUserRole(userRoles))) throw new ForbiddenException("Apply to become an author to create content")
-        return this.blogPostservice.createBlogPost(blogPost,userName,userId)
+    async createBlogPost(
+        @Body(new JoiValidationPipe(BlogPostSchema)) blogPost: CreateBlogPostDto,
+        @UploadedFiles(
+            new FilesValidationPipe()
+        )
+        files: Array<Express.Multer.File>,
+        @TokenDecorator() tokenDto: TokenDto
+    ): Promise<BlogPost> {
+        blogPost.featuredImages = await this.uploadService.uploadFeaturedImages(files);
+        return this.blogPostservice.createBlogPost(blogPost, tokenDto.userId);
     }
-    
+
+    @Public()
     @Get()
     getAllBlogPost(): Promise<BlogPost[]> {
-        return this.blogPostservice.getAllBlogPost()
+        return this.blogPostservice.getAllBlogPost();
     }
-   
+
+    @Public()
     @Get(':id')
-    getBlogPostById(@Param('id', new ParseObjectID()) id:string): Promise<BlogPost> {
-        console.log("id type:",typeof id )
-        return this.blogPostservice.getBlogPostById(id)
+    getBlogPostById(@Param('id', new ObjectIdValidationPipe()) id: string): Promise<BlogPost> {
+        console.log("id type:", typeof id)
+        return this.blogPostservice.getBlogPostById(id);
     }
-    
-    
+
+    @Public()
     @Get('category/:category')
-   // @UsePipes(new JoiValidationPipe(BlogPostParamSchema))
     getAllBlogPostByCategory(@Param('category', new JoiValidationPipe(BlogPostParamSchema)) category: string): Promise<BlogPost[]> {
-        return this.blogPostservice.getAllBlogPostByCategory(category)
+        return this.blogPostservice.getAllBlogPostByCategory(category);
     }
-    
-    @Get('publisher/:postPublisher')
-    getBlogPostByPublisher(@Param('postPublisher', new JoiValidationPipe(BlogPostParamSchema)) postPublisher: string): Promise<BlogPost[]> {
-        return this.blogPostservice.getAllBlogPostByPublisher(postPublisher)
-    }
-    
+
     @Put('update/:id')
-    updateBlogPost(@Param('id', new ParseObjectID()) id: string, @Body() blogPost: CreateBlogPostDto): Promise<BlogPost[]> {
-        return this.blogPostservice.updateBlogPost(id, blogPost)
+    updateBlogPost(@Param('id', new ObjectIdValidationPipe()) id: string, @Body() blogPost: CreateBlogPostDto): Promise<BlogPost[]> {
+        return this.blogPostservice.updateBlogPost(id, blogPost);
     }
-    
+
     @Delete('delete/:id')
-    deleteBlogPost(@Param('id', new ParseObjectID()) id: string): Promise<BlogPost[]> {
+    deleteBlogPost(@Param('id', new ObjectIdValidationPipe()) id: string): Promise<BlogPost[]> {
         return this.blogPostservice.deleteBlogPost(id)
     }
 

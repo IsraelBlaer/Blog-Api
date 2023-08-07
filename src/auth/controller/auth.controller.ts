@@ -11,6 +11,9 @@ UseGuards
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { AuthService } from '../service/auth.service';
 import { AuthGuard } from '../guard/auth.guard';
+import { Public } from 'src/utils/decorators/public.decorator';
+import { JoiValidationPipe } from 'src/utils/pipes/validation.pipe';
+import { authValidator } from '../validators/auth.validator';
 
 
 @Controller('auth')
@@ -20,16 +23,14 @@ export class AuthController {
     
     ){}
   
+  @Public()
   @Post('login')
-  @UsePipes(new ValidationPipe({transform:true}))
-    signIn(@Body() authDto:CreateAuthDto){
-    return  this.authService.signIn(authDto)
+  @UsePipes()
+    signIn(@Body(new JoiValidationPipe(authValidator)) loginDto:CreateAuthDto){
+    return  this.authService.signIn(loginDto)
   }    
-  
-  @UseGuards(AuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
+
 
 }
+
+

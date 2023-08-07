@@ -1,16 +1,13 @@
 import { IsNotEmpty, IsEmail, IsString,MinLength } from 'class-validator'
-
+import { UserRolesEnum } from 'src/user/enum/user.enum'
 export class CreateAuthDto {
-    
-    @IsEmail()
-    //  @IsNotEmpty()
     email: string
-    
-    @IsString()
-    @MinLength(8)
-    @IsNotEmpty()
     password: string
+}
 
-
-    
+export class TokenDto {
+    userId: string
+    userName: string
+    isVerified: boolean
+    userRoles: UserRolesEnum[]
 }

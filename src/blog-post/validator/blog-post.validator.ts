@@ -10,12 +10,8 @@ export const BlogPostSchema = joi.object({
     if (wordCount < 150) throw new BadRequestException("content cannot be less than 150 words")
     return value;
   }),
-  category: joi.string().valid(...Object.values(BlogPostCategoryTypesEnum))
-  
-  // todo
-  // featuredImages : joi.array().
-  // thumbnail : joi.string().required().message('please provide a thumbnail')
-
+  category: joi.string().valid(...Object.values(BlogPostCategoryTypesEnum)).optional(),
+  featuredImages : joi.array().items(joi.string()).min(1).optional(),
 })
 
 export const BlogPostParamSchema = joi.object({
